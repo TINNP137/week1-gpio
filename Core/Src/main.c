@@ -92,13 +92,17 @@ int main(void)
   //------------------------------------------------------
    GPIO_PinState SwitchState1[2];  //Now, Previous
    GPIO_PinState SwitchState2[2];  //Now, Previous
-   uint16_t LED1_Half_Period = 1000;  // 1 Hz
+   GPIO_PinState SwitchState3[2];  //Now, Previous
+   uint16_t LED1_Half_Period = 1000;  // 2 Hz   500 1hz
    uint32_t TimeStamp1 = 0;
    uint32_t ButtonTimeStamp1 = 0;
    uint16_t LED2_Half_Period = 1000;  // 1 Hz
    uint32_t TimeStamp2 = 0;
    uint32_t ButtonTimeStamp2 = 0;
-
+   uint16_t LED3_Half_Period = 500;  // 2 Hz
+   uint32_t TimeStamp3 = 0;
+   uint32_t ButtonTimeStamp3 = 0;
+   uint8_t ex3 = 1;
   //------------------------------------------------------
   /* USER CODE END 2 */
 
@@ -136,8 +140,8 @@ int main(void)
        SwitchState1[1] = SwitchState1[0];
    }
    if(HAL_GetTick() - ButtonTimeStamp2 >= 100)  // ex2
-      {
-       ButtonTimeStamp1 = HAL_GetTick();
+     {
+       ButtonTimeStamp2 = HAL_GetTick();
 
        SwitchState2[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
           //Press = Low , No = High
@@ -155,10 +159,30 @@ int main(void)
         	     }
           }
           SwitchState2[1] = SwitchState2[0];
+     }
+   if(HAL_GetTick() - ButtonTimeStamp3 >= 100)	//ex3
+     {
+       ButtonTimeStamp3 = HAL_GetTick();
+
+       SwitchState3[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
+          //Press = Low , No = High
+          if(SwitchState3[0] == GPIO_PIN_SET && SwitchState3[1] == GPIO_PIN_RESET)
+          // set = high , reset = low
+          {
+        	  if (ex3 == 1)
+        	  {
+        		  ex3=0;
+        	  }
+        	  else if (ex3==0)
+        	  {
+        		  ex3=1;
+        	  }
+          }
+         SwitchState3[1] = SwitchState3[0];
       }
 
    //Run LED
-   if(HAL_GetTick() - TimeStamp1 >= LED1_Half_Period) //millisecond now time
+   if(HAL_GetTick() - TimeStamp1 >= LED1_Half_Period) //millisecond now time //ex1
    {
     TimeStamp1 = HAL_GetTick();
     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_SET)
@@ -170,7 +194,41 @@ int main(void)
      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
     }
    }
+   if (ex3 == 1)
+   {
+	   if(HAL_GetTick() - TimeStamp3 >= LED3_Half_Period) //millisecond now time //ex3
+	      {
+	       TimeStamp3 = HAL_GetTick();
+	       if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)
+	       {
+	        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+	        LED3_Half_Period = 500;
+	       }
+	       else
+	       {
+	        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+	        LED3_Half_Period = 1500;
+	       }
+	      }
+   }
+   else if (ex3 == 0)
+   {
+	   if(HAL_GetTick() - TimeStamp3 >= LED3_Half_Period) //millisecond now time //ex3
+   {
+    TimeStamp3 = HAL_GetTick();
+    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)
+    {
+     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+     LED3_Half_Period = 1500;
+    }
+    else
+    {
+     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+     LED3_Half_Period = 500;
+    }
+   }
 
+   }
 
     /* USER CODE END WHILE */
 
